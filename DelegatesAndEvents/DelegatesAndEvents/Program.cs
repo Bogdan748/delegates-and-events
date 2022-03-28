@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DelegatesAndEvents
 {
@@ -9,42 +10,73 @@ namespace DelegatesAndEvents
 
     public delegate void MessageBrodcastSender(string message);
 
+   
+
     class Program
     {
 
+        private static Func<int> Increment()
+        {
+            int start = 0;
+            return () => 
+            { 
+                start++;
+                Console.WriteLine($"Strt is {start}");
+                return start; 
+            };
+        }
 
+        private static Func<int> IncrementOther()
+        {
+            return () =>
+            {
+                int start = 0;
+                start++;
+                Console.WriteLine($"Strt is {start}");
+                return start;
+            };
+        }
 
         static void Main(string[] args)
         {
-            Calculator c = new Calculator();
+            List<Action> listOfActions = new List<Action>();
 
-            Sum3Values<int> genericFunc = c.Sum;
-            int? resultGeneric = genericFunc?.Invoke(1, 2, 3);
-            Console.WriteLine(resultGeneric);
-            Sum3numbers func = delegate(int a, int b, int c)
+            for (int i = 0; i < 5; i++)
             {
-                return a + b + c;
+                int temp = i;
+                listOfActions.Add(() => Console.WriteLine($"i={temp}"));
+            }
+
+            foreach(Action act in listOfActions)
+            {
+                act();
+            }
+
+            Console.WriteLine("---------------------------------------");
+
+            Func<int> increment = Increment();
+
+            increment();
+            increment();
+            increment();
+            increment();
+
+
+            int a = 10;
+
+            Action action = () =>
+            {
+                a = 30;
+                Console.WriteLine($"Variable capture: {a}");
             };
 
+            a = 20;
 
-            //
-            //Sum3numbers func = c.Sum;
-
-            int result = func(1, 2, 3);
-            Console.WriteLine(result);
+            action();
 
 
+            Console.WriteLine(a);
 
-            MessagePublisher publisher = new MessagePublisher();
-            MessageReceiver receiver = new MessageReceiver();
-            publisher.OnMessageReceived += Program.ReceiveMessage;
-            publisher.OnMessageReceived += receiver.Receive;
-
-            publisher.Publish("Hello Events!");
-
-            publisher.OnMessageReceived -= receiver.Receive;
-
-            publisher.Publish("Hello again Events!");
         }
         /*
         private static int Sum(int a, int b, int c)
@@ -86,5 +118,40 @@ namespace DelegatesAndEvents
 
         }
 
+        private static  void Example_Events()
+        {
+
+            MessagePublisher publisher = new MessagePublisher();
+            MessageReceiver receiver = new MessageReceiver();
+            publisher.OnMessageReceived += Program.ReceiveMessage;
+            publisher.OnMessageReceived += receiver.Receive;
+
+            publisher.Publish("Hello Events!");
+
+            publisher.OnMessageReceived -= receiver.Receive;
+
+            publisher.Publish("Hello again Events!");
+        }
+
+        private static void Example_Generic_Delegates()
+        {
+            Calculator c = new Calculator();
+
+            Sum3Values<int> genericFunc = c.Sum;
+            int? resultGeneric = genericFunc?.Invoke(1, 2, 3);
+            Console.WriteLine(resultGeneric);
+
+            Sum3numbers func = (a, b, c) =>
+            {
+                return a + b + c;
+            };
+
+
+            //
+            //Sum3numbers func = c.Sum;
+
+            int result = func(1, 2, 3);
+            Console.WriteLine(result);
+        }
     }
 }
